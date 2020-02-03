@@ -3,7 +3,7 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import { Provider } from 'react-redux';
 import store from '../store/store';
 import { LoaderContainer } from '../components/loader/Loader';
-
+import '../styles/app.css';
 // import App from 'next/app'
 
 function MyApp({ Component, pageProps }) {
