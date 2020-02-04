@@ -1,5 +1,6 @@
 import { sequelize } from '../../database/db';
 import { Property } from '../../models/Property';
+import { apiResponse } from '../../utils/api.utils';
 
 const createHandler = (req, res) => {
   sequelize.sync().then(() => Property.create(
@@ -9,18 +10,18 @@ const createHandler = (req, res) => {
       console.log('save result', result);
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify(property.toJSON()));
+      res.end(apiResponse(true, property.toJSON))
     });
   }).catch(e => {
     console.error(e);
-    res.end(e);
+    res.end(apiResponse(false, e));
   });
 }
 
 const queryHandler = (req, res) => {
   sequelize.sync().then(() => {
     Property.findAll().then(results => {
-      res.end(JSON.stringify(results));
+      res.end(apiResponse(true, results));
     });
   });
 }
@@ -35,7 +36,9 @@ const deleteHandler = (req, res) => {
       }
     }).then(result => {
       console.log('result', result);
-      res.end(`record with id ${id} has been deleted!`);
+      res.end(apiResponse(true, id));
+    }).catch(e => {
+      res.end(apiResponse(false, e));
     });
   });
 }
@@ -48,9 +51,9 @@ const updateHandler = (req, res) => {
         id
       }
     }).then(result => {
-      res.end(`update recode ${id} successfully!`);
+      res.end(apiResponse(true, result));
     }).catch(e => {
-      res.end(`error on updating record ${id}`);
+      res.end(apiResponse(false, e));
     });
   });
 }
