@@ -10,11 +10,17 @@ import { PropertyFrom } from '../components/property-form/PropertyForm';
 import { AgGridDeleteBtnRender } from '../components/ag-grid-delete-btn-render/AgGridDeleteBtnRender';
 import { AgGridViewBtnRender } from '../components/ag-grid-view-btn-render/AgGridViewBtnRender';
 import { AgGridEditBtnRender } from '../components/ag-grid-edit-btn-render/AgGridEditBtnRender';
-
+import { ADD, EDIT, VIEW } from '../constants/propertyForm.constants';
 
 class HomePage extends React.Component <any, any>{
   public colWidth = 70;
-
+  
+  public titleMap = {
+    [ADD]: 'Add New Property',
+    [EDIT]: 'Edit Property',
+    [VIEW]: 'View the Property',
+  }
+  
   public columnDefs = [
     {
       headerName: 'View',
@@ -25,7 +31,11 @@ class HomePage extends React.Component <any, any>{
       cellRendererParams: {
         title: 'view the property',
         clickCallback: (data) => {
-          console.log('data', data);
+          this.dialogRef.current.openDialog();
+          this.setState({
+            formMode: VIEW,
+            formData: data,
+          })
         }
       }
     },
@@ -38,7 +48,12 @@ class HomePage extends React.Component <any, any>{
       cellRendererParams: {
         title: 'Edit the property',
         clickCallback: (data) => {
-          console.log('data', data);
+          this.dialogRef.current.openDialog();
+          
+          this.setState({
+            formMode: EDIT,
+            formData: data,
+          });
         }
       }
     },
@@ -54,7 +69,6 @@ class HomePage extends React.Component <any, any>{
           store.dispatch(showLoader());
 
           ApiService.deleteProperty(data.id).then((result) => {
-            console.log('delete result', result);
             store.dispatch(hideLoader());
             setTimeout(this.fetchAllPropertyData, 0);
           }).catch((e) => {
@@ -108,12 +122,15 @@ class HomePage extends React.Component <any, any>{
 
   public state = {
     rowData: [],
+    formMode: ADD,
+    formData: {},
   };
   
   public dialogRef = React.createRef<AppDialog>();
 
   constructor(props) {
     super(props);
+    
   }
 
   componentDidMount() {
@@ -124,7 +141,6 @@ class HomePage extends React.Component <any, any>{
     store.dispatch(showLoader());
 
     ApiService.getAllProperties().then(result => {
-      console.log('results', result);
       if (result.success) {
         this.setState({
           rowData: result.data,
@@ -146,13 +162,17 @@ class HomePage extends React.Component <any, any>{
       onSubmit={(formData) => {
         this.dialogRef.current.handleClose();
         store.dispatch(showLoader());
-        ApiService.addProperty(formData).then(result => {
-          setTimeout(this.fetchAllPropertyData, 0);
-        }).catch(console.error)
-        .finally(() => {
-          store.dispatch(hideLoader());
-        });
+        
+        ApiService[this.state.formMode === ADD ? 'addProperty' : 'updateProperty']
+          (formData).then(result => {
+            setTimeout(this.fetchAllPropertyData, 0);
+          }).catch(console.error)
+          .finally(() => {
+            store.dispatch(hideLoader());
+          });
       }}
+      mode={this.state.formMode}
+      data={this.state.formData}
     >
     </PropertyFrom>
   }
@@ -163,7 +183,7 @@ class HomePage extends React.Component <any, any>{
         <Card>
           <CardContent>
             <Tooltip title="Add new item" placement="top">
-              <AddIcon 
+              <AddIcon style={{width: 20, height: 20}}
                 color="primary" 
                 className="tool-icon"
                 onClick={() => {
@@ -193,9 +213,15 @@ class HomePage extends React.Component <any, any>{
           </CardContent>
         </Card>
         <AppDialog
-          title="Add New Property"
+          title={this.titleMap[this.state.formMode]}
           BodyContent={this.dialogBodyContent()}
           ref={this.dialogRef}
+          onClose={() => {
+            this.setState({
+              formData: {},
+              formMode: ADD,
+            });
+          }}
         ></AppDialog>
       </div>
      

@@ -2,9 +2,6 @@ import React from 'react';
 import { 
   Button, 
   TextField, 
-  FormControlLabel, 
-  Checkbox, 
-  FormGroup, 
   FormControl, 
   InputLabel, 
   MenuItem, 
@@ -12,18 +9,35 @@ import {
   Divider 
 } from '@material-ui/core';
 
+import { ADD, EDIT, VIEW } from '../../constants/propertyForm.constants';
+import propTypes from 'prop-types';
+
+
 export class PropertyFrom extends React.Component<any, any> {
-  public state: any = {
-    formData: {},
-    errors: {},
+  public static propTypes = {
+    onCancel: propTypes.func,
+    data: propTypes.object,
+    mode: propTypes.string
   };
 
+  public static defaultProps = {
+    onCancel: () => {},
+    data: {},
+    mode: ADD,
+  };
+  
   constructor(props) {
     super(props);
+
+    this.state = {
+      formData: {...props.data} || {},
+      errors: {},
+    }
   }
 
   setDataBaseOnKeyAndValue = (key: any, value: any, stateName) => {
     const newData = Object.assign({}, this.state[stateName] , {[key]: value});
+    
     this.setState({
       [stateName]: newData,
     });
@@ -35,6 +49,8 @@ export class PropertyFrom extends React.Component<any, any> {
 
   render() {
     const { formData, errors } = this.state;
+    const { mode } = this.props
+    const disabled = mode === VIEW;
 
     return (<div>
       <div>
@@ -43,6 +59,7 @@ export class PropertyFrom extends React.Component<any, any> {
           label="Number of Bedrooms"
           type="number"
           fullWidth
+          disabled={disabled}
           InputLabelProps={{
             shrink: true,
           }}
@@ -60,6 +77,7 @@ export class PropertyFrom extends React.Component<any, any> {
           label="Number of Bathrooms"
           type="number"
           fullWidth
+          disabled={disabled}
           InputLabelProps={{
             shrink: true,
           }}
@@ -77,6 +95,7 @@ export class PropertyFrom extends React.Component<any, any> {
           label="Number of ReceptionRooms"
           type="number"
           fullWidth
+          disabled={disabled}
           InputLabelProps={{
             shrink: true,
           }}
@@ -94,6 +113,7 @@ export class PropertyFrom extends React.Component<any, any> {
           label="Price £"
           type="number"
           fullWidth
+          disabled={disabled}
           InputLabelProps={{
             shrink: true,
           }}
@@ -111,6 +131,7 @@ export class PropertyFrom extends React.Component<any, any> {
           label="First Line of Address"
           type="string"
           fullWidth
+          disabled={disabled}
           InputLabelProps={{
             shrink: true,
           }}
@@ -128,6 +149,7 @@ export class PropertyFrom extends React.Component<any, any> {
           label="Post Code"
           type="string"
           fullWidth
+          disabled={disabled}
           InputLabelProps={{
             shrink: true,
           }}
@@ -145,6 +167,7 @@ export class PropertyFrom extends React.Component<any, any> {
           label="Length of Leasehold"
           type="number"
           fullWidth
+          disabled={disabled}
           InputLabelProps={{
             shrink: true,
           }}
@@ -161,11 +184,12 @@ export class PropertyFrom extends React.Component<any, any> {
         <FormControl
           className="margin-bottom-10" 
           error={errors.isChainFree} 
-          fullWidth   
+          fullWidth
+          disabled={disabled}   
         >
           <InputLabel shrink={true}>Is Chain Free?</InputLabel>
           <Select
-            value={formData.isChainFree}
+            value={typeof formData.isChainFree === 'undefined' ? undefined : (formData.isChainFree ? 1 : 0 )}
             onChange={(e) => {
               this.setDataBaseOnKeyAndValue('isChainFree',e.target.value, 'formData');
             }}
@@ -184,6 +208,7 @@ export class PropertyFrom extends React.Component<any, any> {
           multiline
           rows={10}
           fullWidth
+          disabled={disabled}
           InputLabelProps={{
             shrink: true,
           }}
@@ -200,13 +225,17 @@ export class PropertyFrom extends React.Component<any, any> {
 
       <div style={{marginTop: 30}}>
         <Divider className="margin-bottom-10" />
-        <Button 
-          variant="contained" 
-          color="primary"
-          onClick={this.handleSubmit}
-        >
-          Add Property
-        </Button>
+        {
+         this.props.mode === VIEW ? 
+          '' : 
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={this.handleSubmit}
+          >
+            {this.props.mode === ADD ? 'Add Property' : 'Update Property'}
+          </Button> 
+        }
         &nbsp;&nbsp;&nbsp;&nbsp;
         <Button onClick={this.props.onCancel}>
           Cancel

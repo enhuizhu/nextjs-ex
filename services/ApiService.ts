@@ -9,6 +9,10 @@ export class ApiService {
     return HttpService.post(this.getPath('properties'), data);
   }
 
+  static updateProperty(data) {
+    return HttpService.put(this.getPath(`properties?id=${data.id}`), data);
+  }
+
   static deleteProperty(id) {
     return HttpService.delete(this.getPath(`properties?id=${id}`)) 
   }
