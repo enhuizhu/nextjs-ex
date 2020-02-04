@@ -7,13 +7,9 @@ const createHandler = (req, res) => {
     req.body
   )).then(property => {
     property.save().then(result => {
-      console.log('save result', result);
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
       res.end(apiResponse(true, property.toJSON))
     });
   }).catch(e => {
-    console.error(e);
     res.end(apiResponse(false, e));
   });
 }
@@ -27,7 +23,6 @@ const queryHandler = (req, res) => {
 }
 
 const deleteHandler = (req, res) => {
-  console.log('req.query', req.query);
   const { id } = req.query;
   sequelize.sync().then(() => {
     Property.destroy({
@@ -35,7 +30,6 @@ const deleteHandler = (req, res) => {
         id
       }
     }).then(result => {
-      console.log('result', result);
       res.end(apiResponse(true, id));
     }).catch(e => {
       res.end(apiResponse(false, e));
